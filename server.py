@@ -1,8 +1,9 @@
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from diffusers import DiffusionPipeline
 
 ipv4 = "your-ipv4"
+port = 5000
 
 # Stable Diffusion setup
 pipe = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
@@ -34,23 +35,25 @@ def generateImage():
       return "error"
 
     prompt = request.headers.get("prompt")
-    
-    if (prompt):
+    return jsonify({"prompt":prompt})
+
+    # if (prompt):
         
-        isGenerating = True
-        _ = pipe(prompt, num_inference_steps=1)
+    #     print("Generating from prompt:", prompt)
+    #     isGenerating = True
+    #     _ = pipe(prompt, num_inference_steps=1)
 
-        image = pipe(prompt).images[0]
-        image.save("output.png")
+    #     image = pipe(prompt).images[0]
+    #     image.save("output.png")
 
-        isGenerating = False
+    #     isGenerating = False
 
-        return "hi"
+    #     return "hi"
     
-    else:
-        print("No prompt given")
-        return "error"
+    # else:
+    #     print("No prompt given")
+    #     return "error"
 
 
 
-app.run(host=ipv4)
+app.run(host=ipv4, port=port)
