@@ -1,13 +1,14 @@
-import { StyleSheet, TextInput, View, Text, Button } from 'react-native';
+import { StyleSheet, TextInput, View, Text, Button, Image } from 'react-native';
 import { useState } from 'react';
 
 let ipv4 = "your-ipv4";
 port = 5000;
 
+
 export default function App() {
 
   const [text, updateText] = useState('');
-
+  const [imageURL, updateImage] = useState(null);
 
   return (
     <View style={styles.container}>
@@ -17,7 +18,8 @@ export default function App() {
         placeholder="Enter prompt..."
       />
 
-      <Button title={"Send request"} onPress={() => requestImage(text)} />
+      <Button title={"Generate image"} onPress={async () => updateImage(await requestImage(text))} />
+      {imageURL && <Image source={{ uri: imageURL }} style={{ height: 500, width: 500 }} />}
     </View>
 
   );
@@ -34,11 +36,11 @@ const styles = StyleSheet.create({
 
 async function requestImage(prompt) {
   let image = await fetch(`http://${ipv4}:${port}`, {
-      headers: { "prompt": prompt }
-    }
-  ).then((response) => response.json())
+    headers: { "prompt": prompt }
+  }
+  ).then((response) => response.blob())
 
-  console.log(image)
-  
-  
+  let url = URL.createObjectURL(image);
+  return url;
+
 }

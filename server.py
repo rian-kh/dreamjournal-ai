@@ -1,6 +1,8 @@
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from diffusers import DiffusionPipeline
+from io import BytesIO
+
 
 ipv4 = "your-ipv4"
 port = 5000
@@ -32,27 +34,29 @@ def generateImage():
     # Exit if a generation is in progress
     if (isGenerating):
       print("Generation in progress, new generation ignored")
-      return "error"
+      return jsonify({"error":"Generation in progress"})
 
     prompt = request.headers.get("prompt")
-    return jsonify({"prompt":prompt})
-
-    # if (prompt):
+   
+    if (prompt):
         
-    #     print("Generating from prompt:", prompt)
-    #     isGenerating = True
-    #     _ = pipe(prompt, num_inference_steps=1)
+        print("Generating from prompt:", prompt)
+        isGenerating = True
+        _ = pipe(prompt, num_inference_steps=1)
 
-    #     image = pipe(prompt).images[0]
-    #     image.save("output.png")
-
-    #     isGenerating = False
-
-    #     return "hi"
+        image = pipe(prompt).images[0]
+        
+        # Respond with image, from https://stackoverflow.com/a/11017839/21809626
+        buff = BytesIO()
+        image.save(buff, format="PNG")
+        buff.seek(0)
+        
+        isGenerating = False
+        return send_file(buff, mimetype='image/png')
     
-    # else:
-    #     print("No prompt given")
-    #     return "error"
+    else:
+        print("No prompt given")
+        return jsonify({"error":"No prompt given"})
 
 
 
